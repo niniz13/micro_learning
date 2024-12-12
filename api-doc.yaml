@@ -1,0 +1,376 @@
+openapi: 3.0.0
+info:
+  title: API de la plateforme SaaS de micro-apprentissage
+  description: Contrat d'interface pour les endpoints backend.
+  version: 1.0.0
+paths:
+  /auth/register:
+    post:
+      summary: Création d’un nouveau compte utilisateur.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "user@example.com"
+                password:
+                  type: string
+                  example: "password123"
+                first_name:
+                  type: string
+                  example: "John"
+                last_name:
+                  type: string
+                  example: "Doe"
+      responses:
+        201:
+          description: Compte créé avec succès, email de confirmation envoyé.
+        400:
+          description: Données invalides ou utilisateur déjà existant.
+
+  /auth/login:
+    post:
+      summary: Connexion de l’utilisateur.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "user@example.com"
+                password:
+                  type: string
+                  example: "password123"
+      responses:
+        200:
+          description: Connexion réussie, token JWT retourné.
+        401:
+          description: Identifiants incorrects.
+
+  /auth/logout:
+    post:
+      summary: Déconnexion de l’utilisateur.
+      security:
+        - bearerAuth: []
+      responses:
+        204:
+          description: Déconnexion réussie.
+  
+  /auth/password-reset:
+    post:
+      summary: Réinitialisation du mot de passe.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "user@example.com"
+      responses:
+        200:
+          description: Email de réinitialisation envoyé si l’email est valide.
+        404:
+          description: Utilisateur non trouvé.
+
+  /users:
+    get:
+      summary: Récupération de la liste des utilisateurs.
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Liste des utilisateurs retournée.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    first_name:
+                      type: string
+                      example: "John"
+                    last_name:
+                      type: string
+                      example: "Doe"
+                    email:
+                      type: string
+                      example: "user@example.com"
+                    is_admin:
+                      type: boolean
+                      example: false
+
+    put:
+      summary: Modification des informations de l'utilisateur.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                  example: "Jane"
+                last_name:
+                  type: string
+                  example: "Smith"
+                email:
+                  type: string
+                  example: "new@example.com"
+                password:
+                  type: string
+                  example: "newpassword123"
+      responses:
+        200:
+          description: Informations utilisateur mises à jour avec succès.
+        403:
+          description: Accès non autorisé.
+        404:
+          description: Utilisateur non trouvé.
+
+    delete:
+      summary: Suppression d’un utilisateur (admin seulement).
+      security:
+        - bearerAuth: []
+      responses:
+        204:
+          description: Utilisateur supprimé avec succès.
+        403:
+          description: Accès non autorisé.
+        404:
+          description: Utilisateur non trouvé.
+
+  /modules:
+    get:
+      summary: Récupération de la liste des modules disponibles.
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Liste des modules retournée.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    title:
+                      type: string
+                      example: "Introduction au développement web"
+                    description:
+                      type: string
+                      example: "Apprenez les bases du HTML, CSS et JavaScript."
+                    progress:
+                      type: number
+                      example: 0.75
+
+    post:
+      summary: Création d’un nouveau module (admin).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Nouveau module"
+                description:
+                  type: string
+                  example: "Ce module porte sur..."
+      responses:
+        201:
+          description: Module créé avec succès.
+        403:
+          description: Accès non autorisé.
+
+  /modules/{moduleId}:
+    put:
+      summary: Modification d’un module (admin seulement).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Module mis à jour"
+                description:
+                  type: string
+                  example: "Description mise à jour du module."
+      responses:
+        200:
+          description: Module mis à jour avec succès.
+        403:
+          description: Accès non autorisé.
+        404:
+          description: Module non trouvé.
+
+    delete:
+      summary: Suppression d’un module (admin seulement).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        204:
+          description: Module supprimé avec succès.
+        403:
+          description: Accès non autorisé.
+        404:
+          description: Module non trouvé.
+
+  /modules/{moduleId}/pages:
+    get:
+      summary: Récupération des pages d’un module.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        200:
+          description: Liste des pages du module retournée.
+
+    post:
+      summary: Ajout d’une page à un module (admin).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [video, text, quiz]
+                content:
+                  type: string
+                  example: "URL de la vidéo ou texte ou données du quiz"
+      responses:
+        201:
+          description: Page ajoutée avec succès.
+        403:
+          description: Accès non autorisé.
+
+    put:
+      summary: Modification d’une page d’un module (admin seulement).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+        - name: pageId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [video, text, quiz]
+                content:
+                  type: string
+                  example: "URL de la vidéo ou texte ou données du quiz"
+      responses:
+        200:
+          description: Page modifiée avec succès.
+        403:
+          description: Accès non autorisé.
+        404:
+          description: Page ou module non trouvé.
+
+    delete:
+      summary: Suppression d’une page d’un module (admin seulement).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+        - name: pageId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 2
+      responses:
+        204:
+          description: Page supprimée avec succès.
+        403:
+          description: Accès non autorisé.
+        404:
+          description: Page ou module non trouvé.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
