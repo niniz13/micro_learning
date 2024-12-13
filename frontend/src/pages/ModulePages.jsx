@@ -368,35 +368,6 @@ export default function ModulePages() {
     }
   };
 
-  const handleCompleteModule = async () => {
-    try {
-      const response = await api.completeModule(moduleId);
-      
-      // Update global state with new progression and completed modules
-      dispatch(setProgression(response.data.progression));
-      dispatch(setCompletedModules(response.data.completed_modules));
-      
-      toast({
-        title: response.data.message,
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-      
-      // Navigate back to modules list
-      navigate('/modules');
-    } catch (error) {
-      console.error('Error completing module:', error);
-      toast({
-        title: 'Error completing module',
-        description: error.response?.data?.error || 'An error occurred',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-
   if (loading) {
     return <Box>Loading...</Box>
   }
@@ -406,13 +377,6 @@ export default function ModulePages() {
       <Box mb={5}>
         <Stack direction="row" justify="space-between" align="center">
           <Heading size="lg">{module?.title || 'Loading...'}</Heading>
-          <Button
-            colorScheme="green"
-            onClick={handleCompleteModule}
-            leftIcon={<CheckIcon />}
-          >
-            Complete Module
-          </Button>
         </Stack>
       </Box>
 
